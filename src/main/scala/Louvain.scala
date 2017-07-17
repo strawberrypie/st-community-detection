@@ -4,8 +4,6 @@ import org.apache.spark.graphx._
 
 import scala.reflect.ClassTag
 
-type ComponentID = Long
-
 /**
   * Provides low level louvain community detection algorithm functions.  Generally used by LouvainHarness
   * to coordinate the correct execution of the algorithm though its several stages.
@@ -14,10 +12,11 @@ type ComponentID = Long
   */
 object Louvain {
   private type Message = Map[Community, Double]
+  type ComponentID = Long
+
   val defaultComponentId: PartitionID = -1
 
-  def detectCommunities[VD: ClassTag, ED: ClassTag](
-                                                     graph: Graph[VD, ED]): Graph[ComponentID, ED] = {
+  def detectCommunities[VD: ClassTag, ED: ClassTag](graph: Graph[VD, ED]): Graph[ComponentID, ED] = {
     implicit val context = SparkContext.getOrCreate()
 
     val minProgress: Int = 1 // TODO accept parameters in a different way
