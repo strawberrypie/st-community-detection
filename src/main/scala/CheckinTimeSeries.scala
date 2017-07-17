@@ -8,14 +8,12 @@ import com.fastdtw.util.EuclideanDistance
 object CheckinTimeSeries {
 
   def getTimeSeries(userCheckins: Iterable[Checkin]) = new ScalaTimeSeries(
-    (for {
-          safeCheckins <- Option(userCheckins)
-          checkin <- safeCheckins
-        } yield ScalaTimeSeriesItem(
-            checkin.time.getTime,
-            ScalaTimeSeriesPoint(Array(checkin.lat, checkin.lon))
-        ))
-      .toSeq)
+    Option(userCheckins).toSeq.flatten
+      .map(checkin => ScalaTimeSeriesItem(
+        checkin.time.getTime,
+        ScalaTimeSeriesPoint(Array(checkin.lat, checkin.lon))
+      ))
+  )
 
   def metric(leftUserCheckins: Iterable[Checkin], rightUserCheckins: Iterable[Checkin]): Double = {
     val leftTimeSeries = getTimeSeries(leftUserCheckins)
