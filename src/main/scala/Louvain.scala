@@ -264,16 +264,16 @@ object Louvain {
     deltaQ
   }
 
-  def detectCommunitiesWeighted[VD: ClassTag](
-                                               weightedGraph: Graph[VD, Double]): Graph[ComponentID, Double] = {
+  def detectCommunitiesWeighted[VD: ClassTag](weightedGraph: Graph[VD, Double]): Graph[ComponentID, Double] = {
     implicit val context = SparkContext.getOrCreate()
 
     val minProgress: Int = 1 // TODO accept parameters in a different way
     val progressCounter: Int = 1
 
-    val initialLouvainGraph = createLouvainGraph(weightedGraph)
+    val initialLouvainGraph = createLouvainGraph(weightedGraph).cache()
     val louvainGraph =
-      louvain(initialLouvainGraph, minProgress, progressCounter)._2
+      louvain(initialLouvainGraph, minProgress, progressCounter)._2.cache()
+    initialLouvainGraph.unpersist(blocking = false)
 
     weightedGraph.outerJoinVertices(louvainGraph.vertices) {
       case (_, _, newData) =>

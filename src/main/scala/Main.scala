@@ -21,13 +21,18 @@ object Main extends App {
 
   implicit val sc: SparkContext = SparkContext.getOrCreate()
 
-  val checkins = getCheckinsDataset("/user/akiselev/loc-brightkite_totalCheckins.txt")
-  val edges = getEdges("/user/akiselev/loc-brightkite_edges.txt")
+  val checkins = getCheckinsDataset("/user/akiselev/loc-brightkite_totalCheckins.txt").cache()
+  val edges = getEdges("/user/akiselev/loc-brightkite_edges.txt").cache()
 
-  val graph = Graph[Iterable[Checkin], Int](checkins, edges)
+  val graph = Graph[Iterable[Checkin], Int](checkins, edges).cache()
+  checkins.unpersist(blocking = false)
+  edges.unpersist(blocking = false)
 
-  val weightedGraph = graph.mapTriplets(triplet => 1 / (1 + CheckinTimeSeries.metric(triplet.srcAttr, triplet.dstAttr)))
-  val communitiesGraph = Louvain.detectCommunities(weightedGraph)
+  val weightedGraph = graph
+    .mapTriplets(triplet => 1 / (1 + CheckinTimeSeries.metric(triplet.srcAttr, triplet.dstAttr)))
+    .cache()
+  val communitiesGraph = Louvain.detectCommunitiesWeighted(weightedGraph).cache()
+  weightedGraph.unpersist(blocking = false)
 
 
   val output_file = File("/user/akiselev/brightkite_comminities.txt")
