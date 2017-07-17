@@ -1,8 +1,8 @@
-import org.apache.spark.graphx.{Edge, Graph}
+import org.apache.spark.graphx.{Edge, Graph, PartitionStrategy}
 import org.apache.spark.SparkContext
-
 import com.github.nscala_time.time.RichString._
 import org.apache.spark.rdd.RDD
+
 import scala.tools.nsc.io.File
 
 object Main extends App {
@@ -24,14 +24,17 @@ object Main extends App {
   val checkins = getCheckinsDataset("/user/akiselev/loc-brightkite_totalCheckins.txt").cache()
   val edges = getEdges("/user/akiselev/loc-brightkite_edges.txt").cache()
 
-  val graph = Graph[Iterable[Checkin], Int](checkins, edges).cache()
+  val graph = Graph[Iterable[Checkin], Int](checkins, edges).partitionBy(PartitionStrategy.EdgePartition2D).cache()
   checkins.unpersist(blocking = false)
   edges.unpersist(blocking = false)
 
   val weightedGraph = graph
     .mapTriplets(triplet => 1 / (1 + CheckinTimeSeries.metric(triplet.srcAttr, triplet.dstAttr)))
+    .partitionBy(PartitionStrategy.EdgePartition2D)
     .cache()
-  val communitiesGraph = Louvain.detectCommunitiesWeighted(weightedGraph).cache()
+  val communitiesGraph = Louvain.detectCommunitiesWeighted(weightedGraph)
+    .partitionBy(PartitionStrategy.EdgePartition2D)
+    .cache()
   weightedGraph.unpersist(blocking = false)
 
 
