@@ -18,7 +18,7 @@ object CheckinTimeSeries {
   def metric(leftUserCheckins: Iterable[Checkin], rightUserCheckins: Iterable[Checkin]): Double = {
     val leftTimeSeries = getTimeSeries(leftUserCheckins)
     val rightTimeSeries = getTimeSeries(rightUserCheckins)
-    if (leftTimeSeries.size() + rightTimeSeries.size() <= 2) return Double.MaxValue
+    if (leftTimeSeries.size() <= 2 ||  rightTimeSeries.size() <= 2) return Double.MaxValue
     FastDTW.compare(leftTimeSeries, rightTimeSeries, new EuclideanDistance).getDistance
   }
 
