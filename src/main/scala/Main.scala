@@ -4,7 +4,6 @@ import org.apache.spark.sql._
 
 import com.github.nscala_time.time.RichString._
 import org.apache.spark.rdd.RDD
-import ml.sparkling.graph.operators.algorithms.community.louvain.Louvain
 
 
 object Main extends App {
@@ -22,13 +21,7 @@ object Main extends App {
       .collect { case Array(from, to) => Edge[Int](from, to, -1) }
 
   implicit val session: SparkSession = SparkSession.builder()
-    .master("yarn-cluster")
     .appName("ST-detection")
-    .config("spark.driver.host", "localhost")
-    .config("spark.executor.instances", "4")
-    .config("spark.executor.memory", "5g")
-    .config("spark.driver.maxResultSize", "3g")
-    .config("spark.serializer", "org.apache.spark.serializer.KryoSerializer")
     .getOrCreate()
   implicit val sc: SparkContext = session.sparkContext
 //  import session.sqlContext.implicits._

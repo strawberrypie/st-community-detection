@@ -3,7 +3,6 @@ import com.fastdtw.timeseries.TimeSeries
 class ScalaTimeSeries(items: Seq[ScalaTimeSeriesItem])
   extends TimeSeries
     with Serializable {
-  assert(items.size > 1)
 
   override def getMeasurementVector(pointIndex: Int): Array[Double] = items(pointIndex).point.values
 
