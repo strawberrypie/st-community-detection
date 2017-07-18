@@ -24,16 +24,20 @@ object Main extends App {
   val checkins = getCheckinsDataset("/user/akiselev/loc-brightkite_totalCheckins.txt").cache()
   val edges = getEdges("/user/akiselev/loc-brightkite_edges.txt").cache()
 
-  val graph = Graph[Iterable[Checkin], Int](checkins, edges).partitionBy(PartitionStrategy.EdgePartition2D).cache()
+  val partitionsCount: Int = 16
+
+  val graph = Graph[Iterable[Checkin], Int](checkins, edges)
+    .partitionBy(PartitionStrategy.EdgePartition2D, partitionsCount)
+    .cache()
   checkins.unpersist(blocking = false)
   edges.unpersist(blocking = false)
 
   val weightedGraph = graph
     .mapTriplets(triplet => 1 / (1 + CheckinTimeSeries.metric(triplet.srcAttr, triplet.dstAttr)))
-    .partitionBy(PartitionStrategy.EdgePartition2D)
+    .partitionBy(PartitionStrategy.EdgePartition2D, partitionsCount)
     .cache()
   val communitiesGraph = Louvain.detectCommunitiesWeighted(weightedGraph)
-    .partitionBy(PartitionStrategy.EdgePartition2D)
+    .partitionBy(PartitionStrategy.EdgePartition2D, partitionsCount)
     .cache()
   weightedGraph.unpersist(blocking = false)
 
