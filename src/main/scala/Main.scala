@@ -24,7 +24,7 @@ object Main extends App {
   val checkins = getCheckinsDataset("/user/akiselev/loc-brightkite_totalCheckins.txt").cache()
   val edges = getEdges("/user/akiselev/loc-brightkite_edges.txt").cache()
 
-  val partitionsCount: Int = 16
+  val partitionsCount: Int = 36
 
   val graph = Graph[Iterable[Checkin], Int](checkins, edges)
     .partitionBy(PartitionStrategy.EdgePartition2D, partitionsCount)
@@ -41,12 +41,8 @@ object Main extends App {
     .cache()
   weightedGraph.unpersist(blocking = false)
 
-
-  val output_file = File("/hdfs/user/akiselev/brightkite_communities.txt")
-  output_file.writeAll(
-    communitiesGraph.vertices
-      .map { case (vertexId, communityId) => vertexId.toString + " " + communityId.toString }
-      .reduce(_ + "\n" + _)
-  )
+  communitiesGraph.vertices
+    .map { case (vertexId, communityId) => vertexId.toString + " " + communityId.toString }
+    .saveAsTextFile("hdfs://user/akiselev/brightkite_communities.txt")
 
 }
