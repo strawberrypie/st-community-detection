@@ -43,6 +43,6 @@ object Main extends App {
 
   communitiesGraph.vertices
     .map { case (vertexId, communityId) => vertexId.toString + " " + communityId.toString }
-    .saveAsTextFile("hdfs://user/akiselev/brightkite_communities.txt")
+    .saveAsTextFile("/user/akiselev/brightkite_communities.txt")
 
 }
