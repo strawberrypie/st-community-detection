@@ -38,7 +38,7 @@ object Main extends App {
   weightedGraph.unpersist(blocking = false)
 
 
-  val output_file = File("/user/akiselev/brightkite_comminities.txt")
+  val output_file = File("/home/akiselev/hdfs/brightkite_comminities.txt")
   output_file.writeAll(
     communitiesGraph.vertices
       .map{ case (vertexId, communityId) =>
