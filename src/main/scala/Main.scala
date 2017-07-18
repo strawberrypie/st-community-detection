@@ -33,7 +33,7 @@ object Main extends App {
   edges.unpersist(blocking = false)
 
   val weightedGraph = graph
-    .mapTriplets(triplet => 1 / (1 + CheckinTimeSeries.metric(triplet.srcAttr, triplet.dstAttr)))
+    .mapTriplets(triplet => CheckinTimeSeries.weight(triplet.srcAttr, triplet.dstAttr))
     .partitionBy(PartitionStrategy.EdgePartition2D, partitionsCount)
     .cache()
   val communitiesGraph = Louvain.detectCommunitiesWeighted(weightedGraph)

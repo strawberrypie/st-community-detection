@@ -1,6 +1,6 @@
 import com.fastdtw.dtw.FastDTW
 import com.fastdtw.util.EuclideanDistance
-
+import scala.math.{atan, Pi}
 
 /**
   * Created by kiselev on 12/07/2017.
@@ -15,11 +15,12 @@ object CheckinTimeSeries {
       ))
   )
 
-  def metric(leftUserCheckins: Iterable[Checkin], rightUserCheckins: Iterable[Checkin]): Double = {
+  def weight(leftUserCheckins: Iterable[Checkin], rightUserCheckins: Iterable[Checkin]): Double = {
     val leftTimeSeries = getTimeSeries(leftUserCheckins)
     val rightTimeSeries = getTimeSeries(rightUserCheckins)
-    if (leftTimeSeries.size() <= 2 ||  rightTimeSeries.size() <= 2) return Double.MaxValue
-    FastDTW.compare(leftTimeSeries, rightTimeSeries, new EuclideanDistance).getDistance
+    val distance = if (leftTimeSeries.size() <= 2 ||  rightTimeSeries.size() <= 2) Double.MaxValue
+                   else FastDTW.compare(leftTimeSeries, rightTimeSeries, new EuclideanDistance).getDistance
+    (Pi / 2) - atan(distance)
   }
 
 }
